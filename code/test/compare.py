@@ -62,15 +62,15 @@ def compare(file1,file2):
 		return 0
 
 def main():
-	m_dir = "D:\\Reverse\\ptom\\代码\\test\\m"
-	m2_dir = "D:\\Reverse\\ptom\\代码\\test\\m2"
+	m_dir = "./m"
+	m2_dir = "./m2"
 	
 	mfiles = os.listdir(m_dir)
 	for mfile in mfiles:
 		if(mfile[-2:] != ".m"):
 			continue
-		if(compare("%s\\%s" % (m_dir,mfile),"%s\\%s" % (m2_dir,mfile))==0):
-			print("%s not equal %s" % ("%s\\%s" % (m_dir,mfile),"%s\\%s" % (m2_dir,mfile)))
+		if(compare("%s/%s" % (m_dir,mfile),"%s/%s" % (m2_dir,mfile))==0):
+			print("%s not equal %s" % ("%s/%s" % (m_dir,mfile),"%s/%s" % (m2_dir,mfile)))
 			break
 		else:
 			print("%s compare good" % mfile)
