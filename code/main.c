@@ -16,60 +16,34 @@ void declare()
 	printf("******************************************\n");
 }
 
-#if 1 
-int main()
+int main(int argc, char *argv[])
 {
-	char pfile[512], mfile[512];
-    if(ptom_init() == 0)
-    {
-    	// Original: 初始化失败\n
-    	printf("Initialization failed\n");
-    	return 0;
-	}
-	
-	while(1)
-	{
-		declare();
-		// Original: 请输入p文件路径:
-		printf("Please enter the p file path:");
-		scanf("%511s",pfile);
+    if(argc != 3) {
+        declare();
+        printf("Usage: %s <input_p_file> <output_m_file>\n", argv[0]);
+        printf("Use --version to display version info\n");
+        return 1;
+    }
 
-        if(strcmp(pfile,"exit") == 0)
-			break;
+    if(strcmp(argv[1], "--version") == 0) {
+        declare();
+        return 0;
+    }
 
-		// Original: 请输入m文件路径:
-		printf("Please enter the m file path:");
-		scanf("%511s",mfile);
-        if(strcmp(mfile,"exit") == 0)
-			break;
-			
-		if(ptom_parse(mfile,pfile))
-		{
-			// Original: 转换成功\n
-			printf("Conversion successful\n");
-		}else
-		{
-			// Original: 转换失败\n
-			printf("Conversion failed\n");
-		}
-		// system("pause"); // Note: system("pause") is Windows-specific and often discouraged
-        // Consider replacing with standard input waiting like below:
-        printf("Press Enter to continue...\n");
-        // Clear the input buffer before getchar()
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF); // Consume leftover newline from scanf
-        getchar(); // Wait for Enter key
+    if(ptom_init() == 0) {
+        printf("Initialization failed\n");
+        return 1;
+    }
 
-		// system("cls"); // Note: system("cls") is Windows-specific.
-        // ANSI escape sequence for clearing screen (more portable but not universally supported)
-        printf("\033[2J\033[H");
-        // Or just print newlines to separate visually
-        // printf("\n\n\n\n");
-	}
-	ptom_deinit();
-	return 1; // Note: Standard C typically returns 0 for success
+    if(ptom_parse(argv[2], argv[1])) {
+        printf("Conversion successful\n");
+    } else {
+        printf("Conversion failed\n");
+    }
+
+    ptom_deinit();
+    return 0;
 }
-#endif
 
 #if 0 // This section remains inactive
 int main()
