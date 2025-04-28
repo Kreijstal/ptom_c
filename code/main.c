@@ -1,5 +1,5 @@
 #include<stdio.h>
-#include<io.h>
+//#include<io.h> // Note: This is non-standard, common on Windows (MSVC)
 #include<string.h>
 #include"ptom.h"
 
@@ -7,9 +7,12 @@ void declare()
 {
 	printf("******************************************\n");
 	printf("Version:%.2f\n",ptom_getVersion());
-	printf("本软件不得用于商业用途，仅做学习交流。\n");
-	printf("声明：本软件切勿外泄\n");
-	printf("输入exit退出\n");
+	// Original: 鏈蒋浠朵笉寰楃敤浜庡晢涓氱敤閫旓紝浠呭仛瀛︿範浜ゆ祦銆俓n
+	printf("This software is not intended for commercial use, for learning and exchange purposes only.\n");
+	// Original: 澹版槑锛氭湰杞欢鍒囧嬁澶栨硠\n
+	printf("Disclaimer: Do not leak this software.\n");
+	// Original: 杈撳叆exit閫�鍑篭n
+	printf("Enter exit to quit.\n");
 	printf("******************************************\n");
 }
 
@@ -19,56 +22,74 @@ int main()
 	char pfile[512], mfile[512];
     if(ptom_init() == 0)
     {
-    	printf("初始化失败\n");
+    	// Original: 鍒濆鍖栧け璐n
+    	printf("Initialization failed\n");
     	return 0;
 	}
 	
 	while(1)
 	{
 		declare();
-		printf("请输入p文件路径:");
+		// Original: 璇疯緭鍏鏂囦欢璺緞:
+		printf("Please enter the p file path:");
 		scanf("%511s",pfile);
 
         if(strcmp(pfile,"exit") == 0)
 			break;
 
-		printf("请输入m文件路径:");
+		// Original: 璇疯緭鍏鏂囦欢璺緞:
+		printf("Please enter the m file path:");
 		scanf("%511s",mfile);
         if(strcmp(mfile,"exit") == 0)
 			break;
 			
 		if(ptom_parse(mfile,pfile))
 		{
-			printf("转换成功\n");
+			// Original: 杞崲鎴愬姛\n
+			printf("Conversion successful\n");
 		}else
 		{
-			printf("转换失败\n");
+			// Original: 杞崲澶辫触\n
+			printf("Conversion failed\n");
 		}
-		system("pause");
-		system("cls");
+		// system("pause"); // Note: system("pause") is Windows-specific and often discouraged
+        // Consider replacing with standard input waiting like below:
+        printf("Press Enter to continue...\n");
+        // Clear the input buffer before getchar()
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF); // Consume leftover newline from scanf
+        getchar(); // Wait for Enter key
+
+		// system("cls"); // Note: system("cls") is Windows-specific.
+        // ANSI escape sequence for clearing screen (more portable but not universally supported)
+        printf("\033[2J\033[H");
+        // Or just print newlines to separate visually
+        // printf("\n\n\n\n");
 	}
 	ptom_deinit();
-	return 1;
+	return 1; // Note: Standard C typically returns 0 for success
 }
 #endif
 
-#if 0 
+#if 0 // This section remains inactive
 int main()
 {
 	//test lots of file
 	
-	char p_dir[] = "D:\\Reverse\\ptom\\代码\\test\\p";
-	char m2_dir[] = "D:\\Reverse\\ptom\\代码\\test\\m2";
+	// Original path component: 浠ｇ爜 (d脿im菐) means "Code"
+	char p_dir[] = "D:\\Reverse\\ptom\\Code\\test\\p";
+	char m2_dir[] = "D:\\Reverse\\ptom\\Code\\test\\m2";
 	char pfile[256] = {0};
 	char mfile[256] = {0};	
-	long handle;
-	struct _finddata_t fileinfo;
+	long handle; // Note: long for handle might be 32-bit specific, intptr_t is better if available
+	struct _finddata_t fileinfo; // Note: _finddata_t, _findfirst, _findnext, _findclose are Windows-specific (<io.h>)
 	int pos = 0;
 
     if(ptom_init() == 0)
     {
-    	printf("初始化失败\n");
-    	return -1;
+    	// Original: 鍒濆鍖栧け璐n
+    	printf("Initialization failed\n");
+    	return -1; // Note: Returning non-zero usually indicates failure
 	}
 	
 	sprintf(pfile,"%s\\*.p",p_dir);
@@ -81,7 +102,7 @@ int main()
 		do{
 			sprintf(pfile,"%s\\%s",p_dir,fileinfo.name);
 			pos = sprintf(mfile,"%s\\%s",m2_dir,fileinfo.name);
-			mfile[pos-1] = 'm';
+			mfile[pos-1] = 'm'; // Assumes filenames end in ".p"
 			if(!ptom_parse(mfile,pfile))
 			{
 				printf("%s > %s convert failed\n",pfile,mfile);
@@ -91,6 +112,6 @@ int main()
 	}
 	
 	ptom_deinit();
-	return 1;	
+	return 1;	// Note: Standard C typically returns 0 for success
 }
-#endif 
+#endif

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <windows.h>
+#include <zlib.h>
 #include "ptom.h"
 
 #define H8(x) ((u8)(x>>24))
@@ -31,7 +31,6 @@ struct slot_t
 	u32 size;
 };
 
-typedef int (*uncompress)(u8*,u32*,u8*,u64);
 
 static const u32 s_scramble_tbl[256] = {
 	0x050F0687,0xC3F63AB0,0x2E022A9C,0x036DAA8C,0x32ED8AE2,0xF5571876,0xC66FE7F3,0x6CF0D7C0,
@@ -206,8 +205,6 @@ static const char s_token[134][25]= {
 
 static const char s_major_version[6] = "v01.00";
 static const char s_minor_version[6] = "v00.00";
-static HANDLE s_dll_handle;
-static uncompress s_uncompress_func;
 static float s_version = 1.0;
 
 /************************************
@@ -341,15 +338,13 @@ static int s_check_mfile(struct mfile_t *mfile)
 
 static int s_uncompress(struct mfile_t *mfile,struct pfile_t *pfile)
 {
-	u32 size;
+	uLongf size;  // Changed to match zlib's expected type
 	u8* tmp_ptr;
 
-	if(!s_dll_handle || !s_uncompress_func)
-		return 0;
 
 	s_scramble(pfile);
 
-	size = pfile->size_befor_compass;
+	size = (uLongf)pfile->size_befor_compass;
 	tmp_ptr = (u8*)malloc(size);
 	if(!tmp_ptr)
 		return 0;
@@ -360,7 +355,7 @@ static int s_uncompress(struct mfile_t *mfile,struct pfile_t *pfile)
 	fclose(fp);
 	*/
 	
-	s_uncompress_func(tmp_ptr,&size,pfile->pdata,(u64)pfile->size_after_compass);
+	uncompress(tmp_ptr,&size,pfile->pdata,(u64)pfile->size_after_compass);
 	
 	if(size != pfile->size_befor_compass)
 	{
@@ -552,24 +547,13 @@ float ptom_getVersion()
 
 int ptom_init()
 {
-	s_dll_handle = LoadLibraryA("zlib1.dll");
-	
-	if(!s_dll_handle)
-		return 0;
-	
-	s_uncompress_func = (uncompress)GetProcAddress(s_dll_handle,"uncompress");
-	if(!s_uncompress_func)
-	{
-		FreeLibrary(s_dll_handle);
-		return 0;	
-	}
-	return 1;
+    // zlib is available via direct linking
+    return 1;
 }
 
 void ptom_deinit()
 {
-	if(s_dll_handle)
-		FreeLibrary(s_dll_handle);
+    // No cleanup needed when using zlib directly
 }
 
 int ptom_parse(char* mpath, char *ppath)
